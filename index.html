@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>旋转回廊</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<style>
+*{
+	padding:0;
+	margin:0;
+}
+body{
+    width:100vw;
+    height:100vh;
+}
+.stage{
+	position: relative;
+	overflow: hidden;
+}
+#space{
+	transform-style:preserve-3d;
+    perspective: 80vw;    /*边框视角放大*/
+	width:100vw;
+	height:100vh;	
+}
+.img{
+	position:absolute;
+	left:0;
+	right:0;
+	width:100vw;
+	height:100vh;
+	transform-origin:right;
+    transform: rotateY(-105deg);
+}
+.img:nth-child(1){
+	transform: rotateY(0deg);
+}
+.img:nth-child(2){
+	transform: rotateY(-15deg);
+}
+.img:nth-child(3){
+	transform: rotateY(-30deg);
+}
+.img:nth-child(4){
+	transform: rotateY(-45deg);
+}
+.img:nth-child(5){
+	transform: rotateY(-60deg);
+}
+.img:nth-child(6){
+	transform: rotateY(-75deg);
+}
+.img:nth-child(7){
+	transform: rotateY(-90deg);
+}
+.hide{
+    display: none;
+}
+</style>
+</head>
+<body>
+    <div class="stage">
+	    <div id="space">
+	     	<img src="img/0.png" alt="pic" class="img">
+	     	<img src="img/1.png" alt="pic" class="img">
+	     	<img src="img/2.png" alt="pic" class="img">
+	     	<img src="img/3.png" alt="pic" class="img">
+	     	<img src="img/4.png" alt="pic" class="img">
+	     	<img src="img/5.png" alt="pic" class="img">
+	     	<img src="img/6.png" alt="pic" class="img">
+	     	<img src="img/5.png" alt="pic" class="img">
+	     	<img src="img/4.png" alt="pic" class="img">
+	     	<img src="img/3.png" alt="pic" class="img">
+	     	<img src="img/2.png" alt="pic" class="img">
+	     	<img src="img/3.png" alt="pic" class="img">
+	     	<img src="img/4.png" alt="pic" class="img">
+	     	<img src="img/5.png" alt="pic" class="img">
+	     	<img src="img/6.png" alt="pic" class="img">
+	     	<img src="img/5.png" alt="pic" class="img">
+	     	<img src="img/4.png" alt="pic" class="img">
+	     	<img src="img/3.png" alt="pic" class="img">
+	     	<img src="img/2.png" alt="pic" class="img">
+	     	<img src="img/3.png" alt="pic" class="img">
+	     	<img src="img/4.png" alt="pic" class="img">
+	     	<img src="img/5.png" alt="pic" class="img">
+	     	<img src="img/6.png" alt="pic" class="img">
+	    </div>
+    </div>
+    <script src="https://cdn.bootcss.com/jquery/2.0.3/jquery.min.js"></script>
+    <script>
+        $(function(){
+            document.addEventListener('touchmove', function(e){e.preventDefault()}, false);
+            var t,len = $('.img').length,rotateArr = [0,-15,-30,-45,-60,-75,-90];
+            var stage = {
+                init:$(function(){
+                    //图层反序
+                    for(var l =0;l<len;l++){
+                        $('.img').eq(l).css({'z-index':'999'-l});
+                    };
+                    stage.drag();
+                    $('#space').click(function(){
+                        window.clearInterval(t);
+                    });
+                }),
+                arrAdd:function(){
+                    for (var j = 0; j < len; j++) {
+                        if(rotateArr[j]==0){
+                            rotateArr[j+7]=-105;
+                        }
+                    }
+                },
+                setRightRotate:function() {
+                    stage.arrAdd();
+                    for (var i = 0; i < len; i++) {
+                        if(rotateArr[len-1]==0){
+                            window.clearInterval(t);
+                            return false;
+                        }else{
+                            if(rotateArr[i]>=180){
+                                $('.img').eq(i).addClass('hide');
+                            }else if(rotateArr[i]<=90){
+                                $('.img').eq(i).removeClass('hide');
+                            }
+                            rotateArr[i] += 1;
+                            $('.img').eq(i).css({"transform": 'rotateY(' + rotateArr[i] + 'deg)','z-index':'999'-i});
+                        }
+                    };
+                },
+                setLeftRotate:function(){
+                    for (var i = 0; i < len; i++) {
+                        if(rotateArr[0]<=0){
+                            window.clearInterval(t);
+                            return false;
+                        }else{
+                            if(rotateArr[i]==90){
+                                $('.img').eq(i).removeClass('hide');
+                            }else if(rotateArr[i]<-270){
+                                $('.img').eq(i).addClass('hide');
+                            }
+                            rotateArr[i] -= 1;
+                        }
+                        $('.img').eq(i).css({"transform": 'rotateY(' + rotateArr[i] + 'deg)','z-index':'999'-i});
+                    }
+                },
+                drag: function(){
+                    var obj = $('#space');
+                    obj.bind('touchstart', start);
+                    function start(e) {
+                        deltaX = e.originalEvent.touches[0].pageX;
+                        deltaY = e.originalEvent.touches[0].pageY;
+                        $(document).bind({
+                            'touchmove': move,
+                            'touchend': stop
+                        });
+                    };
+                    function move(e) {
+                        moveX = e.originalEvent.touches[0].pageX - deltaX;
+                        //清空定时器
+                        window.clearInterval(t);
+                        if(moveX>0){
+                            t = setInterval(stage.setRightRotate,40);
+                        }else if(moveX<0){
+                            t = setInterval(stage.setLeftRotate,40);
+                        };
+                    };
+                    function stop() {
+                        $(document).unbind({
+                            'touchmove': move,
+                            'touchend': stop
+                        });
+                    }
+                }
+            };
+        })
+    </script>
+</body>
+</html>
